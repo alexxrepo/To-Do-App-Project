@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import taskIcon from "../../public/Google_Tasks.svg"
 import Modal from "./Modal";
 
 export default function Todo() {
+    const [showModal, setShowModal] = useState(false);
+
+    const handleOpenModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
+    
     return (
         <div className="bg-white rounded shadow-lg p-5 w-75 h-75">
             <div className="d-flex justify-content-center align-items-center">
@@ -10,7 +15,7 @@ export default function Todo() {
                 <h1 className="justify-self-center">To-Do App</h1>
             </div>
             <div className="d-flex justify-content-between align-items-center m-3">
-                <button className="btn btn-primary btn-lg">+ Add Task</button>
+                <button className="btn btn-primary btn-lg" onClick={handleOpenModal}>+ Add Task</button>
                 <input type="text" className="form-control w-25" placeholder="Search Task..."></input>
                 <select className="form-select h-25 w-25">
                     <option>All</option>
@@ -49,6 +54,7 @@ export default function Todo() {
                     </tbody>
                 </table>
             </div>
+            <Modal show={showModal} onClose={handleCloseModal}></Modal>
         </div>
     );
 }
