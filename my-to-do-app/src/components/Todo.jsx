@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import taskIcon from "../../public/Google_Tasks.svg"
 import Modal from "./Modal";
 
@@ -6,10 +6,48 @@ export default function Todo() {
     const [showModal, setShowModal] = useState(false);
     const [tasks, setTasks] = useState([]);
 
+    useEffect(() => {
+        const storedTasks = localStorage.getItem("tasks");
+        if (storedTasks) {
+            setTasks(JSON.parse(storedTasks));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }, [tasks]);
+
     const [search, setSearch] = useState("");
 
     const handleOpenModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
+
+    const [prioritySort, setPrioritySort] = useState("None");
+
+    // Filtered Tasks
+    const filteredTasks = tasks.filter((task) => (
+        search.toLowerCase() === "" ? task : task.name.toLowerCase().includes(search) || task.name.toLowerCase().includes(search)
+    ));
+
+    // Priorities for sorting
+    const prioritiesList = {
+        "High": 3,
+        "Medium": 2,
+        "Low": 1
+    }
+
+    // Get sorted tasks
+    const getSortedTasks = (tasks) => {
+        if (prioritySort === "High to Low") {
+            return [...tasks].sort((a, b) => prioritiesList[b.priority] - prioritiesList[a.priority]);
+        } else if (prioritySort === "Low to High") {
+            return [...tasks].sort((a, b) => prioritiesList[a.priority] - prioritiesList[b.priority]);
+        } else {
+            return tasks;
+        }
+    }
+
+    const sortedTasks = getSortedTasks(filteredTasks);
 
     // Добавление новой задачи в таблицу
     const handleSaveModal = (newTask) => {
@@ -18,9 +56,9 @@ export default function Todo() {
     }
 
     // Удаление задачи
-    const handleDeleteTask = (taskIndex) => {
+    const handleDeleteTask = (taskId) => {
         const updatedTasks = tasks.filter(
-            (item, index) => taskIndex !== index
+            (task) => task.id !== taskId
         )
         const clarify = confirm("Are you sure you want to delete the task?");
 
@@ -35,9 +73,9 @@ export default function Todo() {
     }
 
     // Завершение задачи
-    const handleCompleteTask = (taskIndex) => {
+    const handleCompleteTask = (taskId) => {
         const notCompletedTasks = tasks.filter(
-            (item, index) => taskIndex !== index
+            (task) => task.id !== taskId
         );
         setTasks(notCompletedTasks);
     }
@@ -56,7 +94,7 @@ export default function Todo() {
                     <option>In Progress</option>
                     <option>Complete</option>
                 </select>
-                <select className="form-select h-25 w-25" id="prioritySort">
+                <select className="form-select h-25 w-25" id="prioritySort" value={prioritySort} onChange={(e) => setPrioritySort(e.target.value)}>
                     <option>None</option>
                     <option>High to Low</option>
                     <option>Low to High</option>
@@ -75,18 +113,16 @@ export default function Todo() {
                         </tr>
                     </thead>
                     <tbody className="table-group-divider">
-                        {tasks.filter((task) => (
-                            search.toLowerCase() === "" ? task : task.name.toLowerCase().includes(search) || task.description.toLowerCase().includes(search)
-                        )).map((task, index) => (
-                            <tr key={index}>
+                        {sortedTasks.map((task) => (
+                            <tr key={task.id}>
                                 <th scope="row">{task.name}</th>
                                 <td>{task.description}</td>
                                 <td>{task.priority}</td>
                                 <td>{task.status}</td>
                                 <td className="d-flex justify-content-around">
-                                    <button className="btn btn-success" onClick={() => handleCompleteTask(index)}>Complete</button>
+                                    <button className="btn btn-success" onClick={() => handleCompleteTask(task.id)}>Complete</button>
                                     <button className="btn btn-warning" onClick={handleEditTask}>Edit</button>
-                                    <button className="btn btn-danger" onClick={() => handleDeleteTask(index)}>Delete</button>
+                                    <button className="btn btn-danger" onClick={() => handleDeleteTask(task.id)}>Delete</button>
                                 </td>
                             </tr>
                         ))}

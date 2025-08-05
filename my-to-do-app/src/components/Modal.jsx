@@ -10,6 +10,7 @@ export default function Modal({show, onClose, onSave}) {
 
     const handleSave = (() => {
         const newTask = {
+            id: Date.now(),
             name: taskName,
             description: taskDescription,
             priority: taskPriority,
@@ -55,7 +56,7 @@ export default function Modal({show, onClose, onSave}) {
             </BootstrapModal.Body>
             <BootstrapModal.Footer>
                 <Button variant="secondary" onClick={onClose}>Close</Button>
-                <Button variant="primary" onClick={handleSave}>Save Task</Button>
+                <Button variant="primary" onClick={handleSave}>Add Task</Button>
             </BootstrapModal.Footer>
         </BootstrapModal>
     );
